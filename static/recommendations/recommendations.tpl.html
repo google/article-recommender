@@ -1,0 +1,176 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<md-card class="page-section page-section-content" ng-if="connectionInfo.positive_rating_count == 0 && !introDismissed">
+  <h3>Welcome to Recommender!</h3>
+  <div class="text-content">
+  Vote on content to tune who you will be getting recommendations from.
+  </div>
+  <div class="text-header">
+    <md-icon><i class="material-icons-extended">thumb_up</i></md-icon>
+    = worth your time
+  </div>
+  <div class="text-content">
+    Upvote what you liked and you will get more content from other people who upvoted it and feeds that posted it.
+  </div>
+
+  <div class="text-header">
+    <md-icon><i class="material-icons-extended">thumb_down</i></md-icon>
+    = wasted your time
+  </div>
+  <div class="text-content">
+    Downvote anything that was not worth your time and you will see less content from people who upvoted it and from feeds that posted it.
+  </div>
+
+  <div class="text-header">Try it!</div>
+  <div class="text-content">
+    <md-icon><i class="material-icons-extended">thumb_up</i></md-icon>
+    something and reload your recommendations to see the effect!
+  </div>
+
+  <div style="margin-top: 10px" layout="row" layout-align="end">
+    <md-button ng-click="dismissIntro()"
+               class="md-raised md-primary">Got it!</md-button>
+  </div>
+</md-card>
+
+
+<md-card class="page-section list">
+  <h3 ng-if="connectionInfo.positive_rating_count == 0" class="page-section-content">
+    Recommendations for you
+  </h3>
+
+  <div ng-if="savedStateRestored"
+       class="list-button-container update-button-container">
+    <md-button ng-click="reload()"
+               md-no-ink class="md-primary">
+      <md-icon><i class="material-icons-extended">refresh</i></md-icon>
+      Update
+    </md-button>
+    <br>
+    <span class="secondary">last updated {{ formatDuration(lastUpdatedDate)}}
+    </span>
+  </div>
+
+  <div flex layout="row" layout-align="start center" class="selector-container page-section-content">
+    <time-period-selector time-period="stateParams.timePeriod"
+                          include-last-visit-restricted="true"
+                          include-last-caught-up="true">
+    </time-period-selector>
+
+    <div ng-if="categoryService.categories.length > 0"
+         style="display: inline-block">
+      <category-selector category-id-wrapper="stateParams"
+                         show-any="true">
+      </category-selector>
+    </div>
+  </div>
+
+  <span ng-if="!recommendations.isLoading &&
+      recommendations.items !== null &&
+      recommendations.items.length === 0"
+        class="page-section-content">
+    {{ getNoRecommendationsString() }}
+  </span>
+
+  <div ng-repeat="recommendation in recommendations.items"
+       page-recommendation="recommendation"
+       mode="'RECOMMENDATIONS'"
+       time-period="stateParams.timePeriod">
+  </div>
+  <load-more items="recommendations"></load-more>
+
+  <!-- / recommendations -->
+
+  <div ng-show="stateParams.timePeriod == 'RECENT'">
+    <md-button ng-click="caughtUp()"
+               class="md-raised">
+      I've caught up
+    </md-button>
+    <span class="secondary">
+      Press this button when you caught up with your 'Recent' recommendations
+      so next time you see only new recommendations.
+    </span>
+  </div>
+</md-card>
+
+<!-- Do not show past recommendations while we haven't loaded the first page
+     of the new recommendations yet. -->
+<md-card class="page-section list"
+         ng-show="initialPageLoaded">
+  <div class="sticky-header">
+    Past recommendations
+  </div>
+
+  <div ng-repeat="recommendation in pastRecommendations.items"
+       page-recommendation="recommendation"
+       mode="'PAST_RECOMMENDATIONS'">
+  </div>
+  <load-more items="pastRecommendations"></load-more>
+</md-card>
+<!-- / past recommendations -->
+
+<!-- footer -->
+<div ng-hide="recommendations.isLoading">
+  <div flex layout="row" layout-align="end" class="page-section page-section-content">
+    <md-switch ng-model="showAdvancedSettings">
+      Show advanced settings
+    </md-switch>
+  </div>
+  <md-card ng-show="showAdvancedSettings" class="page-section page-section-content">
+    <h3>Advanced settings</h3>
+    <md-button ng-click="resetSettings()" class="md-raised">
+      Reset to defaults
+    </md-button>
+
+    <md-switch ng-show="stateParams.categoryId == categoryService.ANY_CATEGORY.id"
+               ng-model="stateParams.includePopular"
+               aria-label="Include recommendations from people you are not connected to">
+      Include popular
+    </md-switch>
+
+    <md-slider-container>
+      <span class="md-body-1" style="max-width: fit-content">
+        Decay %
+      </span>
+      <md-slider class="md-primary" md-discrete
+                 ng-model="stateParams.decay"
+                 step="1" min="0" max="100"
+                 aria-label="decay%">
+      </md-slider>
+    </md-slider-container>
+
+    <md-button ng-click="applySettings()" class="md-raised">
+      Apply
+    </md-button>
+  </md-card>
+
+ <div class="page-section">
+   <div class="page-section-content">
+     <div>
+       You are connected to
+       {{connectionInfo ? connectionInfo.user_count : '...'}}
+       users and
+       {{connectionInfo ? connectionInfo.feed_count : '...'}}
+       feeds based on your
+       <a href="#/history">
+         {{connectionInfo ? connectionInfo.positive_rating_count : '...'}}
+         recommendations</a>.
+     </div>
+   </div>
+ </div>
+</div>
+<!-- / footer -->

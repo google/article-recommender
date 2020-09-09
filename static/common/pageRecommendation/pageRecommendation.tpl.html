@@ -1,0 +1,257 @@
+<div>
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<div style="position: relative" ng-hide="state.downvotedAndDismissed">
+  <div ng-if="recommendation.rating === -1 &&
+              state.downvotedNow &&
+              (mode === 'RECOMMENDATIONS' ||
+               mode === 'PAST_RECOMMENDATIONS')"
+       class="downvoted-item">
+    <div class="downvoted-item-content">
+      You will see less content from people and feeds who recommended it.
+    </div>
+    <div class="downvoted-item-buttons">
+      <md-button
+          class="md-default"
+          ng-click="undoDownvote()">
+        Undo
+      </md-button>
+      <md-button
+          class="md-default"
+          ng-click="state.downvotedAndDismissed = true">
+        Hide
+      </md-button>
+    </div>
+  </div>
+<div class="page-recommendation" layout="column"
+     ng-class="(recommendation.rating === 0 && 'neutral') || (recommendation.removed && 'removed')">
+  <div style="display: flex">
+  <div layout="column" style="flex: 1; align-self: start">
+
+  <div flex layout="row" class="main">
+
+    <div flex>
+    <div class="secondary sources-header"
+         ng-click="state.expandedSources = !state.expandedSources"
+         ng-if="(mode === 'RECOMMENDATIONS' ||
+                 mode === 'PAST_RECOMMENDATIONS' ||
+                 mode === 'ITEM_RECOMMENDATIONS' ||
+                 (mode === 'ITEM' && recommendation.feed_count > 0))">
+      <div>
+        from
+        <span ng-show="recommendation.user_count > 0">
+        {{recommendation.user_count}}
+        {{recommendation.user_count === 1 ? 'person' : 'people'}}
+      </span>
+        <span ng-show="recommendation.feed_count > 0">
+        <span ng-show="recommendation.user_count > 0">and</span>
+        {{recommendation.feed_count}}
+        {{recommendation.feed_count === 1 ? 'feed' : 'feeds'}}
+      </span>
+        <md-icon>
+          <i class="material-icons-extended expand-sources-icon">
+            {{state.expandedSources ? 'expand_less' : 'expand_more'}}
+          </i>
+        </md-icon>
+      </div>
+    </div>
+    <div ng-if="state.expandedSources"
+         class="sources-header expanded-sources">
+      <div style="display: block">
+        <div ng-if="recommendation.user_count > 0">
+          recommended by {{recommendation.user_count}}
+          {{recommendation.user_count === 1 ? 'person' : 'people'}}
+          <span ng-if="recommendation.top_sources.length > 0">
+          who recommended:
+        </span>
+        </div>
+        <div ng-if="recommendation.user_count > 0 && !recommendation.top_sources"
+             class="source-secondary">
+          upvote to make their other recommendations rank higher for you
+        </div>
+        <div ng-repeat="topSource in recommendation.top_sources | limitTo:MAX_SOURCES_TO_SHOW" class="source">
+          <a href="{{ topSource.page.url }}"
+             class="source-title"
+             target="_blank"
+             ping="{{ visitUrl }}"
+             rel="noreferrer noopener nofollow">
+            {{ topSource.page.title }}
+          </a>
+          <span ng-if="recommendation.user_count > 1 && topSource.user_count > 1">
+          ({{topSource.user_count}})
+        </span>
+        </div>
+        <div ng-show="recommendation.source_count > MAX_SOURCES_TO_SHOW"
+             class="source-secondary">
+          and
+          {{ recommendation.source_count - MAX_SOURCES_TO_SHOW }}
+          more
+        </div>
+        <div ng-show="recommendation.feed_count > 0">
+          <div ng-show="recommendation.user_count > 0">
+            from
+            {{recommendation.feed_count == 1 ? '1 feed' : recommendation.feed_count + ' feeds'}}:
+          </div>
+          <div ng-repeat="feed_url in recommendation.top_feed_urls"
+               class="source">
+            {{feed_url}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- page title/link -->
+      <div style="display: flex">
+        <div>
+    <a href="{{ destinationUrl }}"
+        class="page-title"
+        ping="{{ visitUrl }}"
+        rel="noreferrer noopener nofollow"
+        target="_blank">
+      <span ng-if="recommendation.page.is_feed"
+            class="secondary"
+            title="An RSS feed. Upvote to see new entries in your recommendations">
+        <i class="material-icons-extended small-icon">rss_feed</i>
+      </span>
+      {{ recommendation.page.title }}
+      <br ng-if="recommendation.page.title">
+      <span ng-if="!(recommendation.page.is_feed ||
+                                                  recommendation.page.is_post && !linkOnlyPost)"
+                                           class="secondary">
+        {{ recommendation.page.domain }}</span></a>
+
+    <span ng-if="recommendation.page.is_feed" class="secondary">
+      (feed: {{ recommendation.page.url }})
+    </span>
+    <span ng-if="recommendation.page.estimated_reading_time"
+         class="secondary">
+      &bull; {{recommendation.page.estimated_reading_time}}&nbsp;minutes
+    </span>
+    <span ng-if="mode === 'POPULAR_RECENT' &&
+                 (!recommendation.page.is_post || linkOnlyPost)"
+          class="secondary">
+      &bull; {{ formatDuration(recommendation.updated_datetime) }}
+    </span>
+        </div>
+      </div>
+
+    <span ng-if="recommendation.date" class="secondary">
+      <br>
+      recommended {{ formatDuration(recommendation.date) }}
+    </span>
+  </div>
+
+  </div>
+  <div ng-if="recommendation.page.description && !recommendation.page.is_post"
+       class="item-description">
+    <a href="{{ destinationUrl }}"
+       ping="{{ visitUrl }}"
+       rel="noreferrer noopener nofollow"
+       target="_blank">
+      {{recommendation.page.description}}
+    </a>
+  </div>
+
+  <div layout="row" layout-align="end center">
+    <!-- thumb up -->
+    <md-button
+        class="md-icon-button rate-button vote-icon-button"
+        ng-click="ratePage(1)"
+        ng-class="recommendation.rating === 1 && 'thumbs-up'"
+        title="Was worth your time">
+      <md-icon>
+        <i class="material-icons-extended">thumb_up</i>
+      </md-icon>
+    </md-button>
+
+    <span ng-if="!!recommendation.positive_ratings" class="rating-count">
+      {{ recommendation.positive_ratings }}
+    </span>
+
+    <span ng-if="mode === 'RECOMMENDATIONS' ||
+                 mode === 'PAST_RECOMMENDATIONS'"
+          title="The score based on your previous upvotes and downvotes"
+          class="recommendation-score">
+      {{recommendation.weight * 100 | number:2}}
+    </span>
+
+    <!-- thumb down -->
+    <md-button
+        class="md-icon-button rate-button vote-icon-button"
+        ng-click="ratePage(-1)"
+        ng-class="recommendation.rating === -1 && 'thumbs-down'"
+        title="Wasted your time">
+      <md-icon>
+        <i class="material-icons-extended">thumb_down</i>
+      </md-icon>
+    </md-button>
+
+    <!-- source category ("recommendations for you" only) -->
+    <span ng-if="(mode === 'RECOMMENDATIONS' || mode === 'PAST_RECOMMENDATIONS') &&
+                 recommendation.rating !== 1"
+          class="source-category">
+      {{ recommendation.source_category.name }}
+    </span>
+
+    <!-- category -->
+    <div ng-if="recommendation.rating == 1"
+         class="recommendation-category-selector">
+      <category-selector category-id-wrapper="recommendation"
+                         show-any="false"
+                         enable-add-new="true"
+                         standalone="true">
+      </category-selector>
+    </div>
+
+    <div flex></div>
+
+
+    <md-menu md-position-mode="target-right target">
+      <md-button ng-click="$mdMenu.open($event)"
+                 class="md-icon-button small-icon-button rate-button"
+                 aria-label="Open menu">
+        <md-icon md-menu-origin>
+          <i class="material-icons-extended">more_vert</i>
+        </md-icon>
+      </md-button>
+      <md-menu-content>
+        <md-menu-item ng-if="mode === 'RECOMMENDATIONS' ||
+                             mode === 'HISTORY'">
+          <md-button
+            ng-click="ratePage(0)"
+            ng-class="recommendation.rating === 0 && 'neutral'"
+            title="Meh (ignore)">
+            <md-icon>
+              <i class="material-icons-extended">clear</i>
+            </md-icon>
+            Don't show again
+          </md-button>
+        </md-menu-item>
+        <md-menu-item ng-if="canMarkUnread">
+          <md-button  ng-click="markUnread()">
+            <md-icon>
+              <i class="material-icons-extended">mark_as_unread</i>
+            </md-icon>
+            Mark unread from here
+          </md-button>
+        </md-menu-item>
+      </md-menu-content>
+    </md-menu>
+  </div>
+  <!-- /rate-buttons -->
+</div>
+</div>
+</div>

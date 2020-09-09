@@ -1,0 +1,125 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div>
+  <md-card class="page-section page-section-content">
+    <div class="sticky-header">Collections</div>
+    <div>
+      <div ng-repeat="category in categoryService.categories"
+           ng-init="categoryName = category.name">
+        <div>
+          <md-input-container class="hide-validation-error">
+            <label>Name</label>
+            <input ng-model="categoryName" size="50" ng-disabled="category.id == categoryService.DEFAULT_CATEGORY.id">
+          </md-input-container>
+          <md-button
+            ng-show="categoryName != category.name"
+            ng-click="categoryService.renameCategory(category.id, categoryName)"
+            class="md-raised">
+            <md-icon>
+              <i class="material-icons-extended">done</i>
+            </md-icon>
+            Rename
+          </md-button>
+          <md-button
+            ng-show="categoryName != category.name"
+            ng-click="categoryName = category.name"
+            class="md-raised">
+            <md-icon>
+              <i class="material-icons-extended">cancel</i>
+            </md-icon>
+            Cancel
+          </md-button>
+
+          <!-- remove category button -->
+          <md-button ng-hide="categoryName != category.name"
+                     ng-click="confirmRemoveCategory(category)"
+                     ng-disabled="category.id == categoryService.DEFAULT_CATEGORY.id"
+                     class="md-raised">
+            <md-icon>
+              <i class="material-icons-extended">clear</i>
+            </md-icon>
+            Delete
+          </md-button>
+        </div>
+      </div>
+      <div ng-init="newCategoryName=''">
+        <md-input-container class="hide-validation-error">
+          <label>New collection name</label>
+          <input ng-model="newCategoryName" size="50">
+        </md-input-container>
+        <md-button
+          ng-disabled="!newCategoryName"
+          ng-click="categoryService.addCategory(newCategoryName); newCategoryName = ''"
+          class="md-raised">
+          <md-icon>
+            <i class="material-icons-extended">done</i>
+          </md-icon>
+          Add
+        </md-button>
+      </div>
+    </div>
+
+    <!-- "categories" explanation -->
+    <div class="secondary">
+      Group your recommendations into collections.
+      You will be able to filter recommendations for a specific collection.
+      <br>
+      It will also help Recommender make more relevant recommendations to other users
+      who share your interests.
+      <br>
+      Example collection names: movies, news, education, local, gaming, fun stuff.
+    </div>
+  </md-card>
+
+  <md-card class="page-section page-section-content">
+    <div>
+      <div class="sticky-header">Export rating history to CSV</div>
+      Press the button below to generate a CSV file with all your ratings.
+      <br>
+      <md-button
+        ng-click="requestExportRatings()"
+        ng-disabled="exportStatus && exportStatus.in_progress"
+        class="md-raised">
+        Export to CSV
+      </md-button>
+      <span ng-show="exportStatus && exportStatus.in_progress">
+        Please wait while we prepare your file...
+      </span>
+      <span ng-show="exportStatus && !exportStatus.in_progress">
+        <a href="download_history?key={{exportStatus.download_key}}">
+          Download</a>
+        (generated {{formatDuration(exportStatus.generated_date)}}, the 'Download' link is valid for 48 hours)
+      </span>
+    </div>
+  </md-card>
+  <md-card class="page-section page-section-content">
+    <div>
+      <div class="sticky-header">Delete your account on Recommender</div>
+      This will delete all your data.
+      <br>
+      This cannot be undone.
+      <br>
+      Consider downloading your rating history first.
+      <br>
+      <md-button
+          ng-click="deleteAccount()"
+          class="md-raised">
+        Delete all data
+      </md-button>
+    </div>
+  </md-card>
+</div>

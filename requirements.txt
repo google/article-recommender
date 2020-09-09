@@ -1,0 +1,8 @@
+feedparser
+beautifulsoup4
+python-dateutil
+html5lib
+GoogleAppEngineMapReduce
+GoogleAppEnginePipeline
+protobuf
+lxml

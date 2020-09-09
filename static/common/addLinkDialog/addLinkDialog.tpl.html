@@ -1,0 +1,101 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<md-dialog aria-label="Add a link" class="add-dialog">
+  <form ng-cloak>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>
+          <i class="material-icons-extended"
+             style="vertical-align: bottom">link</i>
+          &nbsp;Add a link
+        </h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="cancel()">
+          <md-icon aria-label="Close">
+            <i class="material-icons-extended">close</i>
+          </md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block hide-error-spacer">
+          <label>Link</label>
+          <input ng-model="input.url" type="text" md-autofocus>
+        </md-input-container>
+
+        <!-- error -->
+        <div ng-show="input.pageDetailsError" class="md-input-message-animation">
+          <label>Error</label>
+          <span class="">
+            Couldn't get the page title: {{input.pageDetailsError}}
+          </span>
+        </div>
+        <!-- /error -->
+
+        <!-- title -->
+        <md-input-container ng-hide="input.pageDetailsError"
+                            class="hide-error-spacer"
+                            layout="row">
+          <div flex>
+            <label>Title</label>
+            <input ng-model="input.details.title"
+                   ng-disabled="true"
+                   type="text">
+          </div>
+        </md-input-container>
+        <!-- /title -->
+
+        <category-selector category-id-wrapper="input"
+                           show-any="false"
+                           enable-add-new="true">
+        </category-selector>
+        <!-- feed -->
+        <div>
+          <md-input-container ng-show="input.details.feed_url"
+                              class="hide-error-spacer">
+            <i class="material-icons-extended small-icon">rss_feed</i>
+            From feed:
+            <i>
+              {{input.details.feed_url}}
+            </i>
+            You will see items from this feed in your recommendations.
+          </md-input-container>
+          <md-input-container ng-show="input.details.is_feed"
+                              class="hide-error-spacer">
+            <i class="material-icons-extended small-icon">rss_feed</i>
+            You will see items from this feed in your recommendations.
+          </md-input-container>
+        </div>
+        <!-- /feed -->
+      </div>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button ng-click="recommend()"
+                 class="md-raised md-primary"
+                 ng-disabled="input.url === '' || status === 'in progress'">
+        <md-icon class="material-icons-extended">
+          {{status === 'in progress' ? 'file_upload' : 'thumb_up'}}
+        </md-icon>
+        Recommend
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

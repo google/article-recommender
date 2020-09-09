@@ -1,0 +1,90 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div layout="row" class="main-container" ng-hide="activationLink">
+  <md-sidenav class="site-sidenav md-sidenav-left md-whiteframe-z2"
+      md-component-id="leftNav"
+      md-is-locked-open="$mdMedia('gt-md')">
+
+    <md-toolbar class="md-hue-2" layout="row" layout-align="start center">
+      <a href="/index.html#/recommendations///" class="logo md-toolbar-tools">
+        <md-icon style="margin: 0 10px 0 0">
+          <i class="material-icons-extended">thumb_up</i>
+        </md-icon>
+        Recommender
+      </a>
+      <md-button class="md-icon-button" hide-gt-md ng-click="toggleNav()">
+        <md-icon>
+          <i class="material-icons-extended">menu</i>
+        </md-icon>
+      </md-button>
+    </md-toolbar>
+
+    <md-content>
+      <ul class="nav">
+        <li ng-repeat="state in states"
+            ui-sref-active="active">
+          <a ui-sref="{{ state.id }}">
+            <i class="material-icons-extended menu-icon">{{ state.icon }}</i>
+            {{ state.name }}
+          </a>
+        </li>
+      </ul>
+      <div class="signed-in-header">
+        <div>
+          Signed in as <span class="account-name">{{rootScope.signedInAsName}}</span>
+        </div>
+        <div class="spacer"></div>
+        <md-button ng-if="rootScope.switchAccountUrl"
+                   ng-href="{{rootScope.switchAccountUrl}}"
+                   title="Switch account">
+          Switch
+        </md-button>
+      </div>
+    </md-content>
+  </md-sidenav>
+
+  <div flex layout="column" tabIndex="-1" role="main" layout-align="start">
+    <md-toolbar layout="row" class="md-hue-2 md-whiteframe-z1" layout-align="start center">
+      <md-button class="md-icon-button" hide-gt-md ng-click="toggleNav()">
+        <md-icon>
+          <i class="material-icons-extended">menu</i>
+        </md-icon>
+      </md-button>
+      <h1 class="md-toolbar-tools">{{currentState.name}}</h1>
+    </md-toolbar>
+
+    <md-button aria-label="link" class="md-fab md-fab-bottom-right"
+               ng-click="addLink()">
+      <md-icon class="material-icons-extended"
+               aria-label="Link">
+        add
+      </md-icon>
+    </md-button>
+
+    <div layout="column" class="main-content-wrapper">
+      <!-- Main Content -->
+      <div ui-view="content" class="main-content"></div>
+      <!--The min-height is set to make sure that the FAB is not covering main content. -->
+      <div style="padding-top: 33px; min-height: 35px; align-self: start">
+      </div>
+    </div>
+  </div>
+  <md-progress-circular class="spinner"
+      ng-class="{'hide-spinner': hideSpinner}"
+      md-mode="{{ spinnerState }}">
+  </md-progress-circular>
+</div>

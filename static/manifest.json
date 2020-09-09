@@ -1,0 +1,37 @@
+{
+  "name": "Recommender",
+  "short_name": "Recommender",
+  "icons": [{
+    "src": "icons/icon_green_128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }, {
+      "src": "icons/icon_green_144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }, {
+      "src": "icons/icon_green_152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    }, {
+      "src": "icons/icon_green_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }, {
+      "src": "icons/icon_green_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }],
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#EEEEEE",
+  "theme_color": "#43b147",
+  "share_target": {
+    "action": "/index.html",
+    "params": {
+      "title": "share_title",
+      "text": "share_text",
+      "url": "url"
+    }
+  }
+}
